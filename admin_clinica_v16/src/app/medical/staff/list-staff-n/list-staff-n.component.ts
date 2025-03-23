@@ -70,7 +70,6 @@ export class ListStaffNComponent {
     }
 
     deleteUser(){
-      console.log('hola');
       this.staffService.deleteUser(this.staff_selected.id).subscribe((resp:any) => {
         console.log(resp);
         let INDEX = this.usersList.findIndex((item:any) => item.id == this.staff_selected.id);
