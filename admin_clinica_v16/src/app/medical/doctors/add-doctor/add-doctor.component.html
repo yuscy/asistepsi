@@ -100,9 +100,19 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label  for="department">Rol <span class="login-danger">*</span></label>
+                                        <label  >Rol <span class="login-danger">*</span></label>
                                         <mat-select [(ngModel)]="selectedValue" [ngModelOptions]="{standalone: true}" class="form-control select"  placeholder="Seleccione un rol">
                                             <mat-option *ngFor="let data of roles" [value]="data.id">
+                                            {{data.name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label  >Especialidad <span class="login-danger">*</span></label>
+                                        <mat-select [(ngModel)]="specialitie_id" [ngModelOptions]="{standalone: true}" class="form-control select"  placeholder="Seleccione una especialidad">
+                                            <mat-option *ngFor="let data of specialities" [value]="data.id">
                                             {{data.name}}
                                             </mat-option>
                                         </mat-select>
@@ -156,6 +166,45 @@
                                         </div>
                                     </div>
             
+                                    <div class="col-md-12">
+                                        <div class="card-box">
+                                            <div class="card-block">
+                                                <h4 class="card-title">Disponibilidad de horario</h4>
+                                                <div class="table-responsive">
+                                                    <table class="table mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Días / Horas</th>
+                                                                <ng-container *ngFor="let day of week_days">
+                                                                    <th [class]="day.class"> {{ day.day }} </th>
+                                                                </ng-container>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <ng-container *ngFor="let horario_dia of horario_dias">
+                                                                <tr>
+                                                                    <td>{{ horario_dia.format_hour }}</td>
+                                                                    <ng-container *ngFor="let day of week_days">
+                                                                        <td [class]="day.class">
+                                                                            {{ horario_dia.format_hour }} : TODOS <br>
+                                                                            <ng-container *ngFor="let item of horario_dia.items">
+                                                                                <div class="checkbox">
+                                                                                    <label>
+                                                                                        <input type="checkbox" name="checkbox"> {{ item.format_hour_start }} - {{ item.format_hour_end }}
+                                                                                    </label>
+                                                                                </div>
+                                                                            </ng-container>
+                                                                        </td>
+                                                                    </ng-container>
+                                                                </tr>
+                                                            </ng-container>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group row my-4" *ngIf="text_success">
                                         <div class="col-md-12">
                                             <div class="alert alert-success alert-dismissible fade show" role="alert" >

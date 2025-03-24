@@ -26,7 +26,41 @@ export class AddDoctorComponent {
   public IMAGEN_PREVIEW:any = 'assets/img/user-06.jpg';
   public text_success:string = '';
   public text_validation:string = '';
+  public specialities:any = [];
+  public specialitie_id:any;
 
+  public week_days:any = [
+    {
+      day: 'Lunes',
+      class: 'table-primary'
+    },
+    {
+      day: 'Martes',
+      class: 'table-secondary'
+    },
+    {
+      day: 'Miércoles',
+      class: 'table-success'
+    },
+    {
+      day: 'Jueves',
+      class: 'table-danger'
+    },
+    {
+      day: 'Viernes',
+      class: 'table-warning'
+    },
+    {
+      day: 'Sábado',
+      class: 'table-info'
+    },
+    {
+      day: 'Domingo',
+      class: 'table-light'
+    },
+  ];
+
+  public horario_dias:any = [];
 
   constructor(
     public doctorsService: DoctorService
@@ -35,10 +69,12 @@ export class AddDoctorComponent {
   }
 
   ngOnInit(): void {
-    // this.doctorsService.listConfig().subscribe((res: any) => {
-    //   console.log(res);
-    //   this.roles = res.roles;
-    // });
+    this.doctorsService.listConfig().subscribe((res: any) => {
+      console.log(res);
+      this.roles = res.roles;
+      this.specialities = res.specialities;
+      this.horario_dias = res.horario_dias;
+    });
   }
 
   save() {
