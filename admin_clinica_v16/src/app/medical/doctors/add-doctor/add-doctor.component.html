@@ -183,14 +183,27 @@
                                                         <tbody>
                                                             <ng-container *ngFor="let horario_dia of horario_dias">
                                                                 <tr>
-                                                                    <td>{{ horario_dia.format_hour }}</td>
+                                                                    <td>
+                                                                        <div class="checkbox">
+                                                                            <label>
+                                                                                <input type="checkbox" (change)="addHourAllDay($event, horario_dia)" name="checkbox"> {{ horario_dia.format_hour }}
+                                                                            </label>
+                                                                        </div>
+                                                                    </td>
                                                                     <ng-container *ngFor="let day of week_days">
                                                                         <td [class]="day.class">
-                                                                            {{ horario_dia.format_hour }} : TODOS <br>
+                                                                            <div class="checkbox">
+                                                                                <label>
+                                                                                    <input type="checkbox" (click)="addHourAll(horario_dia, day)" name="checkbox" [checked]="isCheckedHourAll(horario_dia, day)"> {{ horario_dia.format_hour }} : TODOS
+                                                                                </label>
+                                                                            </div>
+                                                                             
+                                                                            <br>
+
                                                                             <ng-container *ngFor="let item of horario_dia.items">
                                                                                 <div class="checkbox">
                                                                                     <label>
-                                                                                        <input type="checkbox" name="checkbox"> {{ item.format_hour_start }} - {{ item.format_hour_end }}
+                                                                                        <input type="checkbox" (click)="addHourItem(horario_dia, day, item)" name="checkbox" [checked]="isCheckedHour(horario_dia, day, item)"> {{ item.format_hour_start }} - {{ item.format_hour_end }}
                                                                                     </label>
                                                                                 </div>
                                                                             </ng-container>

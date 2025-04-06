@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { DoctorService } from '../service/doctor.service';
+import { h } from '@fullcalendar/core/preact';
+import { HOUR } from 'ngx-bootstrap/chronos/units/constants';
 
 @Component({
   selector: 'app-add-doctor',
@@ -61,6 +63,7 @@ export class AddDoctorComponent {
   ];
 
   public horario_dias:any = [];
+  public horas_seleccionadas:any = [];
 
   constructor(
     public doctorsService: DoctorService
@@ -89,6 +92,11 @@ export class AddDoctorComponent {
       return;
     }
 
+    if(this.horas_seleccionadas.length == 0) {
+      this.text_validation = 'Necesita seleccionar al menos una disponibilidad de horario';
+      return;
+    }
+
     console.log(this.selectedValue);
     let formData = new FormData();
     formData.append('name', this.name);
@@ -103,7 +111,22 @@ export class AddDoctorComponent {
     formData.append('password', this.password);
     formData.append('confirmpassword', this.confirmpassword);
     formData.append('role_id', this.selectedValue);
+    formData.append('specialitie_id', this.specialitie_id);
     formData.append('avatar', this.FILE_AVATAR);
+
+    let HOUR_SCHEDULES:any = [];
+
+    this.week_days.forEach((day:any) => {
+      let DAYS_HOURS = this.horas_seleccionadas.filter((hour_select:any) => hour_select.day_name == day.day);
+      HOUR_SCHEDULES.push({
+        day_name: day.day,
+        children: DAYS_HOURS,
+        
+      });
+      console.log(HOUR_SCHEDULES);
+    })
+
+    formData.append('schedule_hours', JSON.stringify(HOUR_SCHEDULES));
 
     this.doctorsService.registerDoctor(formData).subscribe((res: any) => {
       console.log(res);
@@ -124,8 +147,10 @@ export class AddDoctorComponent {
         this.password = '';
         this.confirmpassword = '';
         this.selectedValue = '';
+        this.specialitie_id = '';
         this.FILE_AVATAR = null;
         this.IMAGEN_PREVIEW = null;
+        this.horas_seleccionadas = [];
       }
     });
   }
@@ -141,5 +166,134 @@ export class AddDoctorComponent {
     let reader = new FileReader();
     reader.readAsDataURL(this.FILE_AVATAR);
     reader.onloadend = () => this.IMAGEN_PREVIEW = reader.result;
+  }
+
+  addHourItem(horario_dia:any, day:any, item:any) {
+    let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour
+                                  && hour.item.hour_start == item.hour_start
+                                  && hour.item.hour_end == item.hour_end);
+
+    if(INDEX != -1) {
+      this.horas_seleccionadas.splice(INDEX, 1);
+    } else {
+      this.horas_seleccionadas.push({
+        'day': day,
+        'day_name': day.day,
+        'horario_dia': horario_dia,
+        'hour': horario_dia.hour,
+        'grupo': 'none',
+        'item': item
+      });
+    }
+
+    console.log(this.horas_seleccionadas);
+  }
+
+  addHourAll(horario_dia:any, day:any) {
+    let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour && hour.grupo == 'all');
+
+    let COUNT_SELECTED = this.horas_seleccionadas.filter((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour).length;
+
+    if(INDEX != -1 && COUNT_SELECTED == horario_dia.items.length) {
+      horario_dia.items.forEach((item:any) => {
+        let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour
+                                  && hour.item.hour_start == item.hour_start
+                                  && hour.item.hour_end == item.hour_end);
+
+        if(INDEX != -1) {
+          this.horas_seleccionadas.splice(INDEX, 1);
+        }
+      });
+    } else {
+      horario_dia.items.forEach((item:any) => {
+        let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour
+                                  && hour.item.hour_start == item.hour_start
+                                  && hour.item.hour_end == item.hour_end);
+
+        if(INDEX != -1) {
+          this.horas_seleccionadas.splice(INDEX, 1);
+        }
+        this.horas_seleccionadas.push({
+          'day': day,
+          'day_name': day.day,
+          'horario_dia': horario_dia,
+          'hour': horario_dia.hour,
+          'grupo': 'all',
+          'item': item
+        });
+      });
+    }
+
+    console.log(this.horas_seleccionadas);
+  }
+
+  addHourAllDay($event:any, horario_dia:any) {
+    let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.hour == horario_dia.hour );
+
+    if(INDEX != -1 && !$event.currentTarget.checked) {
+      this.week_days.forEach((day:any) => {
+        horario_dia.items.forEach((item:any) => {
+          let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                    && hour.hour == horario_dia.hour
+                                    && hour.item.hour_start == item.hour_start
+                                    && hour.item.hour_end == item.hour_end);
+  
+          if(INDEX != -1) {
+            this.horas_seleccionadas.splice(INDEX, 1);
+          }
+        });
+      })
+    } else {
+      this.week_days.forEach((day:any) => {
+        horario_dia.items.forEach((item:any) => {
+          let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                    && hour.hour == horario_dia.hour
+                                    && hour.item.hour_start == item.hour_start
+                                    && hour.item.hour_end == item.hour_end);
+  
+          if(INDEX != -1) {
+            this.horas_seleccionadas.splice(INDEX, 1);
+          }
+        });
+      })
+
+      setTimeout(() => {
+        this.week_days.forEach((day:any) => {
+          this.addHourAll(horario_dia, day);
+        })
+      }, 25);
+    }
+
+  }
+
+  isCheckedHourAll(horario_dia:any, day:any) {
+    let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour && hour.grupo == 'all');
+    let COUNT_SELECTED = this.horas_seleccionadas.filter((hour:any) => hour.day_name == day.day 
+                                      && hour.hour == horario_dia.hour).length;
+
+    if(INDEX != -1 && COUNT_SELECTED == horario_dia.items.length) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  isCheckedHour(horario_dia:any, day:any, item:any) {
+    let INDEX = this.horas_seleccionadas.findIndex((hour:any) => hour.day_name == day.day 
+                                  && hour.hour == horario_dia.hour
+                                  && hour.item.hour_start == item.hour_start
+                                  && hour.item.hour_end == item.hour_end);
+
+    if(INDEX != -1) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
