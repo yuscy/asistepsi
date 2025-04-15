@@ -3,6 +3,9 @@
 namespace App\Models;
 
  // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Doctor\DoctorScheduleDay;
+use App\Models\Doctor\Specialitie;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -77,5 +80,13 @@ class User extends Authenticatable implements JWTSubject {
       */
     public function getJWTCustomClaims() {
         return [];
+    }
+
+    public function specialitie() {
+      return $this->belongsTo(Specialitie::class);
+    }
+
+    public function schedule_days() {
+      return $this->hasMany(DoctorScheduleDay::class);
     }
 }

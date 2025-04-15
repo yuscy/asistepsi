@@ -67,7 +67,7 @@ export class ListDoctorComponent {
         this.doctor_selected = rol;
       }
   
-      deleteUser(){
+      deleteDoctor(){
         this.doctorService.deleteDoctor(this.doctor_selected.id).subscribe((resp:any) => {
           console.log(resp);
           let INDEX = this.usersList.findIndex((item:any) => item.id == this.doctor_selected.id);

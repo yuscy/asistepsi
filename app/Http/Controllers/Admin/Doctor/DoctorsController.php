@@ -24,7 +24,7 @@ class DoctorsController extends Controller
     public function index(Request $request)
     {
         $search = $request -> search;
-        $users = User::where(DB::raw("CONCAT(users.name, ' ', users.surname, ' ', users.email)"), 'like', '%'.$search.'%')
+        $users = User::where(DB::raw("CONCAT(users.name, ' ', IFNULL(users.surname,''), ' ', users.email)"), 'like', '%'.$search.'%')
                 // 'name', 'like','%'.$search.'%'
                 // -> orWhere('surname', 'like','%'.$search.'%')
                 // -> orWhere('email', 'like','%'.$search.'%')
@@ -71,9 +71,6 @@ class DoctorsController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $schedule_hours = json_decode($request -> schedule_hours, 1);
@@ -126,9 +123,6 @@ class DoctorsController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $user = User::findorFail($id);
@@ -138,19 +132,80 @@ class DoctorsController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(Request $request, string $id)
     {
-        //
+        $schedule_hours = json_decode($request -> schedule_hours, 1);
+        $users_is_valid = User::where('id', '<>', $id) -> where('email', $request -> email) -> first();
+
+        if($users_is_valid){
+            return response() -> json([
+                'message' => 403,
+                'message_text' => 'El correo ya se encuentra registrado'
+            ]);
+        };
+
+        
+        $user = User:: findorFail($id);
+
+        if($request -> password){
+            $request -> request -> add(['password' => bcrypt($request -> password)]);
+        }
+
+        if($request -> hasFile('imagen')){
+            if($user -> avatar){
+                Storage::delete($user -> avatar);
+            }
+            $path = Storage::putFile('staffs', $request -> file('imagen'));
+            $request -> request -> add(['avatar' => $path]);
+        };
+
+        $request->request->add(['birth_date' => Carbon::parse(preg_replace('/\s*\(.*\)$/', '', $request->birth_date))]);
+
+        $user -> update($request -> all());
+
+        if($request -> role_id != $user -> roles() -> first() -> id){
+            $role_old = Role::findorFail($user -> roles() -> first() -> id);
+            $user -> removeRole($role_old);
+
+            $role_new = Role::findorFail($request -> role_id);
+            $user -> assignRole($role_new);
+        }
+
+        //Almacenar la disponibilidad de horario del doctor
+        foreach($user -> schedule_days as $key => $schedule_day) { 
+            $schedule_day -> delete();
+        }
+
+        foreach($schedule_hours as $schedule_hour){
+            if(sizeof($schedule_hour['children']) > 0) {
+                $schedule_day = DoctorScheduleDay::create([
+                    'user_id' => $user -> id,
+                    'day' => $schedule_hour['day_name'],
+                ]);
+    
+                foreach($schedule_hour['children'] as $children){
+                    DoctorScheduleJoinHour::create([
+                        'doctor_schedule_day_id' => $schedule_day -> id,
+                        'doctor_schedule_hour_id' => $children['item']['id'],
+                    ]);
+                }
+            }
+        }
+
+        return response() -> json([
+            'message' => 200
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy(string $id)
     {
-        //
+        $user = User::findorFail($id);
+        $user -> delete();
+
+        return response() -> json([
+            'message' => 200
+        ]);
     }
 }

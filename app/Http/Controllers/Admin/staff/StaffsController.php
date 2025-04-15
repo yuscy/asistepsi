@@ -19,7 +19,7 @@ class StaffsController extends Controller
      */
     public function index(Request $request) {
         $search = $request -> search;
-        $users = User::where(DB::raw("CONCAT(users.name, ' ', users.surname, ' ', users.email)"), 'like', '%'.$search.'%')
+        $users = User::where(DB::raw("CONCAT(users.name, ' ', IFNULL(users.surname, ''), ' ', users.email)"), 'like', '%'.$search.'%')
                 // 'name', 'like','%'.$search.'%'
                 // -> orWhere('surname', 'like','%'.$search.'%')
                 // -> orWhere('email', 'like','%'.$search.'%')
